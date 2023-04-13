@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+option csharp_namespace = "RouteOptimization.Protos";
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+
+message Location {
+    double latitude = 1;
+    double longitude = 2;
+}
+
+message Timewindows {
+    google.protobuf.Timestamp end_time = 1;
+    google.protobuf.Timestamp start_time = 2;
+}
+
+message Demand {
+	int32 type = 1;
+	double demand = 2;
+}
+
+message Capacity {
+	int32 type = 1;
+	double capacity = 2;
+}
+
+message Constraints {
+	Timewindows pickup_time_windows = 1;
+    Timewindows dropoff_time_windows = 2;
+	repeated Demand demand = 3;
+}
+
+message Shipment {
+    google.protobuf.StringValue shipment_id = 1;
+    Location pickup_location = 2;
+    Location dropoff_location = 3;
+    google.protobuf.StringValue pickup_address = 4;
+    google.protobuf.StringValue dropff_address = 5;
+    Constraints constraints = 6;
+    google.protobuf.StringValue info = 7;
+}
+
+message Vehicle {
+	google.protobuf.StringValue vehicle_id = 1;
+    repeated Capacity capacities = 2;
+    Location start_location = 3;
+    Location end_location = 4;
+    int32 load_time = 5;
+    int32 unload_time = 6;
+    Timewindows time_working = 7;
+}
+
+
+message Visit {
+    int32 type = 1;
+    Shipment shipment = 2;
+    google.protobuf.Timestamp eta = 3;
+    repeated Demand demand = 4;
+}
+
+message Route {
+	Vehicle vehicle = 1;
+	repeated Visit visits = 2;
+
+}
+
+//--------- v1
+message VisitLite {
+    int32 type = 1;
+    string shipment_id = 2;
+    google.protobuf.Timestamp eta = 3;
+    repeated Demand demand = 4;
+}
+
+message RouteLite {
+	string vehicle_id = 1;
+	repeated VisitLite visits = 2;
+}
+// ----------
+
+//request
+message reqModel {
+	repeated Shipment shipments = 1;
+	repeated Vehicle vehicles = 2;
+}
+
+//response
+message resRoutes {
+	repeated Route routes = 1;
+}
+
+//response
+message resRoutesLite {
+	repeated RouteLite routes = 1;
+}
+
+service RouteOptimationService{
+    rpc BestRoute(reqModel) returns (resRoutes){
+        option (google.api.http) = {
+		    post : "/v0/route",
+            body : "*"
+		};
+    }
+
+    rpc BestRouteLite(reqModel) returns (resRoutesLite){
+        option (google.api.http) = {
+		    post : "/v1/route",
+            body : "*"
+		};
+    }
+}

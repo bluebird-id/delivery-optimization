@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option csharp_namespace = "RouteOptimization.Protos";
+
+message ConstantDataModel{
+	int32 id = 1;
+	int32 seacrh_time_limit = 2;
+	int32 max_vehicle_distance = 3;
+	int32 max_active_vehicle = 4;
+	bool is_active = 5;
+}
+
+message ContantDataEmpty {}
+
+service ConstantDataGrpcSeervice{
+	rpc AddOrUpdate(ConstantDataModel) returns (ContantDataEmpty);
+	rpc GetSetting(ContantDataEmpty) returns (ConstantDataModel);
+}
