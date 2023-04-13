@@ -1,8 +1,9 @@
-﻿namespace RouteOptimization.Helpers
+﻿namespace RouteOptimization.Utils.Helper
 {
     public static class DateTimeHelper
     {
-        public static long ToMinute(this DateTime dateTime) { 
+        public static long ToMinute(this DateTime dateTime)
+        {
             return dateTime.Hour * 60 + dateTime.Minute;
         }
     }
