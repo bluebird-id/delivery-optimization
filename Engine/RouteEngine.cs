@@ -1,5 +1,4 @@
-﻿using RouteOptimization.Helpers;
-using RouteOptimization.Models;
+﻿using RouteOptimization.Models;
 using RouteOptimization.Protos;
 using RouteOptimization.Repositories.Client;
 using RouteOptimization.Utils.Constans;
@@ -9,6 +8,7 @@ using Google.Type;
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 using Osrm.HttpApiClient;
+using RouteOptimization.Utils.Helper;
 
 namespace RouteOptimization.Engine
 {

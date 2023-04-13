@@ -1,4 +1,4 @@
-﻿namespace RouteOptimization.Helpers
+﻿namespace RouteOptimization.Utils.Helper
 {
     public class ShipmentTime
     {
