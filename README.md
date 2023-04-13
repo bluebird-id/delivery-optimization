@@ -22,13 +22,13 @@ Run Locally
 Clone the project
 
 ```bash
-  git clone https://github.com/xxxxx
+  git clone https://github.com/delivery-optimization
 ```
 
 Go to the project directory
 
 ```bash
-  cd xxxxx
+  cd ~/delivery-optimization
 ```
 
 Install dependencies
@@ -45,7 +45,7 @@ Start the server
 ## Demo
 
 ```
-$ curl --location 'http://localhost:8000/v1/route' \
+$ curl --location 'http://localhost:7000/v1/route' \
 --header 'Content-Type: application/json' \
 --data '{ request data example below }'
 ```
