@@ -22,7 +22,7 @@ Run Locally
 Clone the project
 
 ```bash
-  git clone https://github.com/delivery-optimization
+  git clone https://github.com/bluebird-id/delivery-optimization.git
 ```
 
 Go to the project directory
