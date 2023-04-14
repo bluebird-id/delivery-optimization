@@ -3,23 +3,35 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RouteOptimization", "RouteOptimization.csproj", "{49E2583A-8F32-4D1A-B5D3-A9F2F7F8F860}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RouteOptimization", "RouteOptimization\RouteOptimization.csproj", "{8392D9FB-9F75-4B82-ABD2-EF3748DC7C90}"
 EndProject
 Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{49E2583A-8F32-4D1A-B5D3-A9F2F7F8F860}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{49E2583A-8F32-4D1A-B5D3-A9F2F7F8F860}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{49E2583A-8F32-4D1A-B5D3-A9F2F7F8F860}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{49E2583A-8F32-4D1A-B5D3-A9F2F7F8F860}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96758983-27E3-4D7C-8111-E29CA3F81F1A}
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8392D9FB-9F75-4B82-ABD2-EF3748DC7C90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8392D9FB-9F75-4B82-ABD2-EF3748DC7C90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8392D9FB-9F75-4B82-ABD2-EF3748DC7C90}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8392D9FB-9F75-4B82-ABD2-EF3748DC7C90}.Debug|x64.Build.0 = Debug|Any CPU
+		{8392D9FB-9F75-4B82-ABD2-EF3748DC7C90}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8392D9FB-9F75-4B82-ABD2-EF3748DC7C90}.Debug|x86.Build.0 = Debug|Any CPU
+		{8392D9FB-9F75-4B82-ABD2-EF3748DC7C90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8392D9FB-9F75-4B82-ABD2-EF3748DC7C90}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8392D9FB-9F75-4B82-ABD2-EF3748DC7C90}.Release|x64.ActiveCfg = Release|Any CPU
+		{8392D9FB-9F75-4B82-ABD2-EF3748DC7C90}.Release|x64.Build.0 = Release|Any CPU
+		{8392D9FB-9F75-4B82-ABD2-EF3748DC7C90}.Release|x86.ActiveCfg = Release|Any CPU
+		{8392D9FB-9F75-4B82-ABD2-EF3748DC7C90}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
