@@ -95,7 +95,7 @@ namespace RouteOptimization.Models
         public long[] Capasities { get; set; }
     }
 
-    public enum Types
+    public enum EType
     {
         Volume = 1,
         Weight = 2,

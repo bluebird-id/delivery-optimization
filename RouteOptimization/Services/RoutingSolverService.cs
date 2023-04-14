@@ -1,18 +1,18 @@
-﻿using RouteOptimization.Models;
-using RouteOptimization.Protos;
-using RouteOptimization.Repositories;
+﻿using System;
+using System.Globalization;
+using Google.Apis.Util;
 using Google.OrTools.ConstraintSolver;
+using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Google.Type;
 using Grpc.Core;
-using System.Globalization;
-using System;
-using Google.Protobuf;
-using RouteOptimization.Engine;
-using Google.Apis.Util;
-using DateTime = System.DateTime;
 using Microsoft.OpenApi.Validations.Rules;
+using RouteOptimization.Engine;
+using RouteOptimization.Models;
+using RouteOptimization.Protos;
+using RouteOptimization.Repositories;
 using RouteOptimization.Repositories.Client;
+using DateTime = System.DateTime;
 
 namespace RouteOptimization.Services
 {
@@ -22,14 +22,14 @@ namespace RouteOptimization.Services
         private readonly ILogger<RoutingSolverService> _log;
         private readonly IRepository _repo;
 
-        public RoutingSolverService(IRepository repo, IConfiguration configuration, ILogger<RoutingSolverService> log)
+        public RoutingSolverService( IRepository repo, IConfiguration configuration, ILogger<RoutingSolverService> log )
         {
-            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            _log = log ?? throw new ArgumentNullException(nameof(log));
-            _repo = repo ?? throw new ArgumentNullException(nameof(repo));
+            _configuration = configuration ?? throw new ArgumentNullException( nameof( configuration ) );
+            _log = log ?? throw new ArgumentNullException( nameof( log ) );
+            _repo = repo ?? throw new ArgumentNullException( nameof( repo ) );
         }
 
-        public override async Task<resRoutesLite> BestRouteLite(reqModel request, ServerCallContext context)
+        public override async Task<resRoutesLite> BestRouteLite( reqModel request, ServerCallContext context )
         {
             try
             {
@@ -37,21 +37,21 @@ namespace RouteOptimization.Services
                 double pickLong = 0;
                 double dropLatt = 0;
                 double dropLong = 0;
-                System.DateTime dateTime = new System.DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-                var oOsrm = new OsrmClient(_configuration);
+                System.DateTime dateTime = new System.DateTime( 1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc );
+                var oOsrm = new OsrmClient( _configuration );
 
-                Console.WriteLine("Begin call BestRoute service");
+                Console.WriteLine( "Begin call BestRoute service" );
                 List<Models.ShipmentModel> lShipment = new List<Models.ShipmentModel>();
-                foreach (var item in request.Shipments)
+                foreach( var item in request.Shipments )
                 {
-                    if (item.PickupLocation == null)
+                    if( item.PickupLocation == null )
                     {
-                        (pickLatt, pickLong) = oOsrm.GetGeoCode(item.PickupAddress).Result;
+                        (pickLatt, pickLong) = oOsrm.GetGeoCode( item.PickupAddress ).Result;
                     }
 
-                    if (item.DropoffLocation == null)
+                    if( item.DropoffLocation == null )
                     {
-                        (dropLatt, dropLong) = oOsrm.GetGeoCode(item.DropffAddress).Result;
+                        (dropLatt, dropLong) = oOsrm.GetGeoCode( item.DropffAddress ).Result;
                     }
 
                     var oPickup = new Models.LocationModel
@@ -67,16 +67,16 @@ namespace RouteOptimization.Services
                     };
 
                     List<Models.DemandModel> lDemand = new List<Models.DemandModel>();
-                    foreach (var itemDemand in item.Constraints.Demand)
+                    foreach( var itemDemand in item.Constraints.Demand )
                     {
                         Models.DemandModel sDemand = new Models.DemandModel();
                         sDemand.Type = itemDemand.Type;
                         sDemand.Demands = itemDemand.Demand_;
 
-                        lDemand.Add(sDemand);
+                        lDemand.Add( sDemand );
                     }
 
-                    lShipment.Add(new Models.ShipmentModel
+                    lShipment.Add( new Models.ShipmentModel
                     {
                         ShipmentId = item.ShipmentId,
                         PickupAddress = item.PickupAddress,
@@ -99,23 +99,23 @@ namespace RouteOptimization.Services
                             },
                             Demands = lDemand,
                         }
-                    });
+                    } );
                 }
 
                 List<Models.VehicleModel> lVehicle = new List<Models.VehicleModel>();
-                foreach (var item in request.Vehicles)
+                foreach( var item in request.Vehicles )
                 {
                     List<Models.CapacityModel> lCapacity = new List<Models.CapacityModel>();
-                    foreach (var itemCapacity in item.Capacities)
+                    foreach( var itemCapacity in item.Capacities )
                     {
                         Models.CapacityModel sCapacity = new Models.CapacityModel();
                         sCapacity.Type = itemCapacity.Type;
                         sCapacity.Capacities = itemCapacity.Capacity_;
 
-                        lCapacity.Add(sCapacity);
+                        lCapacity.Add( sCapacity );
                     }
 
-                    lVehicle.Add(new Models.VehicleModel
+                    lVehicle.Add( new Models.VehicleModel
                     {
                         VehicleId = item.VehicleId,
                         Capacities = lCapacity,
@@ -128,66 +128,66 @@ namespace RouteOptimization.Services
                             StartTime = item.TimeWorking.StartTime.ToDateTime(),
                             EndTime = item.TimeWorking.EndTime.ToDateTime()
                         },
-                    });
+                    } );
                 }
 
                 //PROCESS ROUTE OPTIMAZION
                 var oEng = new RouteEngine();
-                var lRoute = await oEng.RouteSolution(lShipment, lVehicle, _configuration);
+                var lRoute = oEng.RouteSolution( lShipment, lVehicle, _configuration );
 
                 resRoutesLite ret = new resRoutesLite();
-                foreach (var r in lRoute)
+                foreach( var r in lRoute )
                 {
                     Protos.RouteLite oRoute = new Protos.RouteLite
                     {
                         VehicleId = r.Vehicle.VehicleId,
                     };
-                    foreach (var v in r.Visits)
+                    foreach( var v in r.Visits )
                     {
                         string TS = "";
 
-                        if (v.Type == 1)
+                        if( v.Type == 1 )
                         {
-                            TS = v.Shipment.Constraints.PickupTimeWindows.StartTime.ToString("yyyy-MM-dd") + " " + v.Eta.ToString();
+                            TS = v.Shipment.Constraints.PickupTimeWindows.StartTime.ToString( "yyyy-MM-dd" ) + " " + v.Eta.ToString();
                         }
                         else
                         {
-                            TS = v.Shipment.Constraints.DropoffTimeWindows.StartTime.ToString("yyyy-MM-dd") + " " + v.Eta.ToString();
+                            TS = v.Shipment.Constraints.DropoffTimeWindows.StartTime.ToString( "yyyy-MM-dd" ) + " " + v.Eta.ToString();
                         }
 
                         List<Protos.Demand> lsDemand = new List<Protos.Demand>();
-                        foreach (var d in v.Demand)
+                        foreach( var d in v.Demand )
                         {
                             Protos.Demand oDemand = new Protos.Demand();
 
                             oDemand.Type = d.Type;
                             oDemand.Demand_ = d.Demands;
 
-                            lsDemand.Add(oDemand);
+                            lsDemand.Add( oDemand );
                         }
 
                         var oVisit = new Protos.VisitLite
                         {
-                            Eta = Timestamp.FromDateTime(DateTime.ParseExact(TS, "yyyy-MM-dd HH:mm:ss", null).ToUniversalTime()),
+                            Eta = Timestamp.FromDateTime( DateTime.ParseExact( TS, "yyyy-MM-dd HH:mm:ss", null ).ToUniversalTime() ),
                             Type = v.Type,
                             ShipmentId = v.Shipment.ShipmentId
                         };
-                        oVisit.Demand.Add(lsDemand);
-                        oRoute.Visits.Add(oVisit);
+                        oVisit.Demand.Add( lsDemand );
+                        oRoute.Visits.Add( oVisit );
                     }
-                    ret.Routes.Add(oRoute);
+                    ret.Routes.Add( oRoute );
                 }
 
                 return ret;
             }
-            catch (Exception ex)
+            catch( Exception ex )
             {
-                Console.WriteLine($"Error exception {ex.Message}");
+                Console.WriteLine( $"Error exception {ex.Message}" );
                 return new resRoutesLite();
             }
         }
 
-        public override async Task<resRoutes> BestRoute(reqModel request, ServerCallContext context)
+        public override async Task<resRoutes> BestRoute( reqModel request, ServerCallContext context )
         {
             try
             {
@@ -195,21 +195,21 @@ namespace RouteOptimization.Services
                 double pickLong = 0;
                 double dropLatt = 0;
                 double dropLong = 0;
-                System.DateTime dateTime = new System.DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-                var oOsrm = new OsrmClient(_configuration);
+                System.DateTime dateTime = new System.DateTime( 1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc );
+                var oOsrm = new OsrmClient( _configuration );
 
-                Console.WriteLine("Begin call BestRoute service");
+                Console.WriteLine( "Begin call BestRoute service" );
                 List<Models.ShipmentModel> lShipment = new List<Models.ShipmentModel>();
-                foreach (var item in request.Shipments)
+                foreach( var item in request.Shipments )
                 {
-                    if (item.PickupLocation == null)
+                    if( item.PickupLocation == null )
                     {
-                        (pickLatt, pickLong) = oOsrm.GetGeoCode(item.PickupAddress).Result;
+                        (pickLatt, pickLong) = oOsrm.GetGeoCode( item.PickupAddress ).Result;
                     }
 
-                    if (item.DropoffLocation == null)
+                    if( item.DropoffLocation == null )
                     {
-                        (dropLatt, dropLong) = oOsrm.GetGeoCode(item.DropffAddress).Result;
+                        (dropLatt, dropLong) = oOsrm.GetGeoCode( item.DropffAddress ).Result;
                     }
 
                     var oPickup = new Models.LocationModel
@@ -225,16 +225,16 @@ namespace RouteOptimization.Services
                     };
 
                     List<Models.DemandModel> lDemand = new List<Models.DemandModel>();
-                    foreach (var itemDemand in item.Constraints.Demand)
+                    foreach( var itemDemand in item.Constraints.Demand )
                     {
                         Models.DemandModel sDemand = new Models.DemandModel();
                         sDemand.Type = itemDemand.Type;
                         sDemand.Demands = itemDemand.Demand_;
 
-                        lDemand.Add(sDemand);
+                        lDemand.Add( sDemand );
                     }
 
-                    lShipment.Add(new Models.ShipmentModel
+                    lShipment.Add( new Models.ShipmentModel
                     {
 
                         ShipmentId = item.ShipmentId,
@@ -258,23 +258,23 @@ namespace RouteOptimization.Services
                             },
                             Demands = lDemand,
                         }
-                    });
+                    } );
                 }
 
                 List<Models.VehicleModel> lVehicle = new List<Models.VehicleModel>();
-                foreach (var item in request.Vehicles)
+                foreach( var item in request.Vehicles )
                 {
                     List<Models.CapacityModel> lCapacity = new List<Models.CapacityModel>();
-                    foreach (var itemCapacity in item.Capacities)
+                    foreach( var itemCapacity in item.Capacities )
                     {
                         Models.CapacityModel sCapacity = new Models.CapacityModel();
                         sCapacity.Type = itemCapacity.Type;
                         sCapacity.Capacities = itemCapacity.Capacity_;
 
-                        lCapacity.Add(sCapacity);
+                        lCapacity.Add( sCapacity );
                     }
 
-                    lVehicle.Add(new Models.VehicleModel
+                    lVehicle.Add( new Models.VehicleModel
                     {
                         VehicleId = item.VehicleId,
                         Capacities = lCapacity,
@@ -287,25 +287,25 @@ namespace RouteOptimization.Services
                             StartTime = item.TimeWorking.StartTime.ToDateTime(),
                             EndTime = item.TimeWorking.EndTime.ToDateTime()
                         },
-                    });
+                    } );
                 }
 
                 //PROCESS ROUTE OPTIMAZION
                 var oEng = new RouteEngine();
-                var lRoute = await oEng.RouteSolution(lShipment, lVehicle, _configuration);
+                var lRoute = oEng.RouteSolution( lShipment, lVehicle, _configuration );
 
                 resRoutes ret = new resRoutes();
-                foreach (var r in lRoute)
+                foreach( var r in lRoute )
                 {
                     List<Protos.Capacity> lsCapacity = new List<Protos.Capacity>();
-                    foreach (var c in r.Vehicle.Capacities)
+                    foreach( var c in r.Vehicle.Capacities )
                     {
                         Protos.Capacity oCapacity = new Protos.Capacity();
 
                         oCapacity.Type = c.Type;
                         oCapacity.Capacity_ = c.Capacities;
 
-                        lsCapacity.Add(oCapacity);
+                        lsCapacity.Add( oCapacity );
                     }
 
                     Protos.Route oRoute = new Protos.Route
@@ -333,46 +333,46 @@ namespace RouteOptimization.Services
                         },
                     };
 
-                    oRoute.Vehicle.Capacities.Add(lsCapacity);
+                    oRoute.Vehicle.Capacities.Add( lsCapacity );
 
-                    foreach (var v in r.Visits)
+                    foreach( var v in r.Visits )
                     {
                         string TS = "";
 
-                        if (v.Type == 1)
+                        if( v.Type == 1 )
                         {
-                            TS = v.Shipment.Constraints.PickupTimeWindows.StartTime.ToString("yyyy-MM-dd") + " " + v.Eta.ToString();
+                            TS = v.Shipment.Constraints.PickupTimeWindows.StartTime.ToString( "yyyy-MM-dd" ) + " " + v.Eta.ToString();
                         }
                         else
                         {
-                            TS = v.Shipment.Constraints.DropoffTimeWindows.StartTime.ToString("yyyy-MM-dd") + " " + v.Eta.ToString();
+                            TS = v.Shipment.Constraints.DropoffTimeWindows.StartTime.ToString( "yyyy-MM-dd" ) + " " + v.Eta.ToString();
                         }
 
                         List<Protos.Demand> lsDemand = new List<Protos.Demand>();
-                        foreach (var d in v.Demand)
+                        foreach( var d in v.Demand )
                         {
                             Protos.Demand oDemand = new Protos.Demand();
 
                             oDemand.Type = d.Type;
                             oDemand.Demand_ = d.Demands;
 
-                            lsDemand.Add(oDemand);
+                            lsDemand.Add( oDemand );
                         }
 
                         List<Protos.Demand> lsSipmentDemand = new List<Protos.Demand>();
-                        foreach (var d in v.Shipment.Constraints.Demands)
+                        foreach( var d in v.Shipment.Constraints.Demands )
                         {
                             Protos.Demand oDemand = new Protos.Demand();
 
                             oDemand.Type = d.Type;
                             oDemand.Demand_ = d.Demands;
 
-                            lsSipmentDemand.Add(oDemand);
+                            lsSipmentDemand.Add( oDemand );
                         }
 
                         var oVisit = new Protos.Visit
                         {
-                            Eta = Timestamp.FromDateTime(DateTime.ParseExact(TS, "yyyy-MM-dd HH:mm:ss", null).ToUniversalTime()),
+                            Eta = Timestamp.FromDateTime( DateTime.ParseExact( TS, "yyyy-MM-dd HH:mm:ss", null ).ToUniversalTime() ),
                             Type = v.Type,
                             Shipment = new Protos.Shipment
                             {
@@ -394,29 +394,29 @@ namespace RouteOptimization.Services
                                 {
                                     PickupTimeWindows = new Protos.Timewindows
                                     {
-                                        StartTime = Timestamp.FromDateTime(v.Shipment.Constraints.PickupTimeWindows.StartTime),
-                                        EndTime = Timestamp.FromDateTime(v.Shipment.Constraints.PickupTimeWindows.EndTime),
+                                        StartTime = Timestamp.FromDateTime( v.Shipment.Constraints.PickupTimeWindows.StartTime ),
+                                        EndTime = Timestamp.FromDateTime( v.Shipment.Constraints.PickupTimeWindows.EndTime ),
                                     },
                                     DropoffTimeWindows = new Protos.Timewindows
                                     {
-                                        StartTime = Timestamp.FromDateTime(v.Shipment.Constraints.DropoffTimeWindows.StartTime),
-                                        EndTime = Timestamp.FromDateTime(v.Shipment.Constraints.DropoffTimeWindows.EndTime),
+                                        StartTime = Timestamp.FromDateTime( v.Shipment.Constraints.DropoffTimeWindows.StartTime ),
+                                        EndTime = Timestamp.FromDateTime( v.Shipment.Constraints.DropoffTimeWindows.EndTime ),
                                     }
                                 },
                             }
                         };
-                        oVisit.Shipment.Constraints.Demand.Add(lsSipmentDemand);
-                        oVisit.Demand.Add(lsDemand);
-                        oRoute.Visits.Add(oVisit);
+                        oVisit.Shipment.Constraints.Demand.Add( lsSipmentDemand );
+                        oVisit.Demand.Add( lsDemand );
+                        oRoute.Visits.Add( oVisit );
                     }
-                    ret.Routes.Add(oRoute);
+                    ret.Routes.Add( oRoute );
                 }
 
                 return ret;
             }
-            catch (Exception ex)
+            catch( Exception ex )
             {
-                Console.WriteLine($"Error exception {ex.Message}");
+                Console.WriteLine( $"Error exception {ex.Message}" );
                 return new resRoutes();
             }
         }
